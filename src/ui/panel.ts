@@ -36,7 +36,9 @@ export function showPanel(
 	}
 	headerHtml += `<div class="header-info">`;
 	headerHtml += `<span class="name">${escapeHtml(data.name ?? "Unknown")}</span>`;
-	headerHtml += `<span class="product">${escapeHtml(productLabel(data.product))}</span>`;
+	headerHtml += `<span class="badges"><span class="product-badge">${escapeHtml(productLabel(data.product))}</span>`;
+	if (data.hasKKEx) headerHtml += `<span class="kkex-badge">MOD</span>`;
+	headerHtml += `</span>`;
 	headerHtml += `</div></div>`;
 
 	// Details

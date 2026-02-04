@@ -6,17 +6,17 @@ Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカー
 
 ## できること
 
-Koikatu・Honeycomeのキャラカードを発見すると自動で読み込み、以下のようなツールチップを表示させます。
+ブラウザ上でKoikatu・Honeycomeのキャラカードを発見すると自動で読み込み、以下のようなツールチップを表示させます。
 
-<img src="https://i.imgur.com/X8Gsi1I.png" width="33%">
+<img src="https://i.imgur.com/aljWIB0.png" width="50%">
 
 ツールチップをクリックすると、更に詳しい画面が表示されます。
 
-<img src="https://i.imgur.com/VlAtHnO.png" width="75%">
+<img src="https://i.imgur.com/q0fWnYc.png" width="75%">
 
 さらに、どのMODを使用しているのかもリスト表示することができます。
 
-<img src="https://i.imgur.com/O7thMLx.png" width="75%">
+<img src="https://i.imgur.com/wv59pYm.png" width="75%">
 
 ## 機能
 

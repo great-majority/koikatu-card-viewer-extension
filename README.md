@@ -8,15 +8,15 @@ A Chrome extension that detects Koikatu/Honeycome character cards from PNG image
 
 When a Koikatu/Honeycome character card is found, it automatically loads the data and displays a tooltip like this:
 
-<img src="https://i.imgur.com/X8Gsi1I.png" width="33%">
+<img src="https://i.imgur.com/aljWIB0.png" width="50%">
 
 Click the tooltip to open a detailed view:
 
-<img src="https://i.imgur.com/VlAtHnO.png" width="75%">
+<img src="https://i.imgur.com/q0fWnYc.png" width="75%">
 
 It can also list which mods are used by the character:
 
-<img src="https://i.imgur.com/O7thMLx.png" width="75%">
+<img src="https://i.imgur.com/wv59pYm.png" width="75%">
 
 ## Features
 

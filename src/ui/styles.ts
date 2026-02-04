@@ -39,9 +39,21 @@ export const OVERLAY_STYLES = `
     color: #fff;
   }
 
-  .koikatu-tooltip .product {
-    font-size: 12px;
-    color: #a0a0b0;
+  .koikatu-tooltip .badges {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .product-badge {
+    display: inline-block;
+    background: rgba(100, 140, 220, 0.2);
+    color: #80b0f0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
   }
 
   .kkex-badge {
@@ -50,9 +62,8 @@ export const OVERLAY_STYLES = `
     color: #e0b040;
     font-size: 10px;
     font-weight: 600;
-    padding: 1px 5px;
+    padding: 1px 6px;
     border-radius: 3px;
-    margin-left: 4px;
     vertical-align: middle;
   }
 
@@ -110,9 +121,11 @@ export const OVERLAY_STYLES = `
     color: #fff;
   }
 
-  .koikatu-panel .product {
-    font-size: 13px;
-    color: #a0a0b0;
+  .koikatu-panel .badges {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 2px;
   }
 
   .koikatu-panel .detail-row {

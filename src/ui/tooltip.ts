@@ -17,8 +17,9 @@ export function showTooltip(
 
 	let html = `<div class="info">`;
 	html += `<span class="name">${escapeHtml(data.name ?? "Unknown")}</span>`;
-	html += `<span class="product">${escapeHtml(productLabel(data.product))}`;
-	if (data.hasKKEx) html += ` <span class="kkex-badge">MOD</span>`;
+	html += `<span class="badges">`;
+	html += `<span class="product-badge">${escapeHtml(productLabel(data.product))}</span>`;
+	if (data.hasKKEx) html += `<span class="kkex-badge">MOD</span>`;
 	html += `</span>`;
 	html += `</div>`;
 

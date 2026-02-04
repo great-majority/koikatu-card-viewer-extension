@@ -9,12 +9,13 @@ export function escapeHtml(str: string): string {
 
 export function productLabel(product: string): string {
 	const map: Record<string, string> = {
-		Koikatu: "Koikatu (コイカツ)",
-		"Koikatsu Party": "Koikatsu Party",
-		"Koikatsu Sunshine": "Koikatsu Sunshine",
-		EmotionCreators: "Emotion Creators",
-		AIS: "AI Shoujo",
-		HoneyCome: "HoneyCome (ハニカム)",
+		"【KoiKatuChara】": "Koikatu",
+		"【KoiKatuCharaSun】": "KoikatuSunshine",
+		"【EroMakeChara】": "EmotionCreators",
+		"【HCChara】": "Honeycome",
+		"【HCPChara】": "Honeycome Party",
+		"【SVChara】": "SummerVacationScramble",
+		"【ACChara】": "Aicomi",
 	};
 	return map[product] ?? product;
 }
