@@ -21,6 +21,8 @@ export type ParseResponse = {
 	sex?: number;
 	hasKKEx?: boolean;
 	kkexKeys?: string[];
+	userID?: string;
+	dataID?: string;
 	blocks: string[];
 	faceImageDataUrl?: string;
 };

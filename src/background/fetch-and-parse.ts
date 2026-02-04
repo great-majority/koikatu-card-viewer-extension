@@ -96,8 +96,10 @@ export async function fetchAndParse(
 		}
 		const summary = parseCardSummary(bytes, { containsPng: true });
 		const data = serializeForTransfer(summary);
+		const hasAbout = summary.blocks.includes("About");
 		const needsBlockParse =
 			summary.hasKKEx ||
+			hasAbout ||
 			summary.product === "【SVChara】" ||
 			summary.product === "【ACChara】";
 		if (needsBlockParse) {
@@ -110,6 +112,13 @@ export async function fetchAndParse(
 					const kkex = card.blocks.KKEx;
 					if (kkex && typeof kkex === "object") {
 						data.kkexKeys = Object.keys(kkex).sort();
+					}
+				}
+				if (hasAbout) {
+					const about = card.blocks.About;
+					if (about && typeof about === "object") {
+						if (typeof about.userID === "string") data.userID = about.userID;
+						if (typeof about.dataID === "string") data.dataID = about.dataID;
 					}
 				}
 				const blockImageData = extractBlockImageData(

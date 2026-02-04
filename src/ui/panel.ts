@@ -45,6 +45,12 @@ export function showPanel(
 	let detailsHtml = "";
 	detailsHtml += `<div class="detail-row"><span class="detail-label">Sex</span><span class="detail-value">${escapeHtml(sexLabel(data.sex))}</span></div>`;
 	detailsHtml += `<div class="detail-row"><span class="detail-label">Birthday</span><span class="detail-value">${escapeHtml(formatBirthday(data.birthday))}</span></div>`;
+	if (data.userID) {
+		detailsHtml += `<div class="detail-row"><span class="detail-label">User ID</span><span class="detail-value">${escapeHtml(data.userID)}</span></div>`;
+	}
+	if (data.dataID) {
+		detailsHtml += `<div class="detail-row"><span class="detail-label">Data ID</span><span class="detail-value">${escapeHtml(data.dataID)}</span></div>`;
+	}
 	// Blocks
 	let blocksHtml = "";
 	if (data.blocks.length > 0) {
