@@ -2,7 +2,21 @@
 
 [日本語](README.ja.md)
 
-A Chrome extension (Manifest V3) that detects Koikatu/Honeycome character cards in PNG images on web pages and displays card info via overlay.
+A Chrome extension that detects Koikatu/Honeycome character cards from PNG images on web pages and displays card info as an overlay.
+
+## What it does
+
+When a Koikatu/Honeycome character card is found, it automatically loads the data and displays a tooltip like this:
+
+<img src="https://i.imgur.com/X8Gsi1I.png" width="33%">
+
+Click the tooltip to open a detailed view:
+
+<img src="https://i.imgur.com/VlAtHnO.png" width="75%">
+
+It can also list which mods are used by the character:
+
+<img src="https://i.imgur.com/O7thMLx.png" width="75%">
 
 ## Features
 
@@ -15,7 +29,7 @@ A Chrome extension (Manifest V3) that detects Koikatu/Honeycome character cards 
 ## Requirements
 
 - Node.js 18+
-- [koikatu.js](../koikatu.js) must exist at `../koikatu.js`
+- [koikatu.js](https://github.com/great-majority/koikatu.js)
 
 ## Build
 
