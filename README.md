@@ -18,6 +18,14 @@ It can also list which mods are used by the character:
 
 <img src="https://i.imgur.com/wv59pYm.png" width="75%">
 
+## Install
+
+1. Download the latest `koikatu-extension-vX.X.X.zip` from [Releases](https://github.com/great-majority/koikatu-card-viewer-extension/releases)
+2. Extract the ZIP file
+3. Open `chrome://extensions` in Chrome
+4. Enable "Developer mode"
+5. Click "Load unpacked" and select the extracted folder
+
 ## Features
 
 - Auto-scans `<img>` / `<a>` elements with `.png` URLs (supports dynamically added elements via MutationObserver)
@@ -26,12 +34,16 @@ It can also list which mods are used by the character:
 - Non-card PNGs are quickly rejected via lightweight header check (with LRU cache)
 - Options page to toggle enable/disable, hover delay, and tooltip visibility
 
-## Requirements
+---
+
+## Development
+
+### Requirements
 
 - Node.js 18+
 - [koikatu.js](https://github.com/great-majority/koikatu.js)
 
-## Build
+### Build
 
 ```bash
 npm install
@@ -40,13 +52,25 @@ npm run build
 
 This generates the `dist/` directory.
 
-## Install
+### Install from Source
 
-1. Open `chrome://extensions` in Chrome
-2. Enable "Developer mode"
-3. Click "Load unpacked" and select the `dist/` directory
+1. Build the project (see above)
+2. Open `chrome://extensions` in Chrome
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the `dist/` directory
 
-## Architecture
+### Release
+
+To create a new release:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions will automatically build and publish the release with the extension ZIP attached.
+
+### Architecture
 
 ```
 Content Script          Service Worker

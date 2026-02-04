@@ -18,6 +18,14 @@ Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカー
 
 <img src="https://i.imgur.com/wv59pYm.png" width="75%">
 
+## インストール
+
+1. [Releases](https://github.com/great-majority/koikatu-card-viewer-extension/releases) から最新の `koikatu-extension-vX.X.X.zip` をダウンロード
+2. ZIP ファイルを展開
+3. Chrome で `chrome://extensions` を開く
+4. 「デベロッパーモード」を有効にする
+5. 「パッケージ化されていない拡張機能を読み込む」から展開したフォルダを選択
+
 ## 機能
 
 - `.png` の `<img>` / `<a>` 要素を自動スキャン (MutationObserver で動的追加にも対応)
@@ -26,12 +34,16 @@ Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカー
 - 非カードPNGは軽量ヘッダーチェックで早期スキップ (LRU キャッシュ付き)
 - Optionsページで有効/無効、ホバー遅延、ツールチップ表示の切り替え
 
-## 必要なもの
+---
+
+## 開発
+
+### 必要なもの
 
 - Node.js 18+
 - [koikatu.js](https://github.com/great-majority/koikatu.js)
 
-## ビルド
+### ビルド
 
 ```bash
 npm install
@@ -40,13 +52,25 @@ npm run build
 
 `dist/` ディレクトリが生成されます。
 
-## インストール
+### ソースからインストール
 
-1. Chrome で `chrome://extensions` を開く
-2. 「デベロッパーモード」を有効にする
-3. 「パッケージ化されていない拡張機能を読み込む」から `dist/` を選択
+1. プロジェクトをビルド (上記参照)
+2. Chrome で `chrome://extensions` を開く
+3. 「デベロッパーモード」を有効にする
+4. 「パッケージ化されていない拡張機能を読み込む」から `dist/` を選択
 
-## アーキテクチャ
+### リリース
+
+新しいリリースを作成するには:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions が自動でビルドし、拡張機能の ZIP を添付したリリースを公開します。
+
+### アーキテクチャ
 
 ```
 Content Script          Service Worker
