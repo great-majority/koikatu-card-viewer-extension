@@ -3,6 +3,7 @@ import { initOverlay } from "@/ui/overlay";
 import { bindElements, setSettings } from "./interaction";
 import { observeDOM } from "./observer";
 import { scanForPngElements } from "./scanner";
+import { initSceneDownloadTools } from "./scene-links";
 
 async function init(): Promise<void> {
 	const settings = await loadSettings();
@@ -11,6 +12,7 @@ async function init(): Promise<void> {
 	if (!settings.enabled) return;
 
 	initOverlay();
+	initSceneDownloadTools();
 
 	// Scan existing elements
 	const existing = scanForPngElements();

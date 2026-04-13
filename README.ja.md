@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカードを検出し、カード情報をオーバーレイ表示するChrome拡張機能です。
+Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカードを検出し、カード情報をオーバーレイ表示するChrome拡張機能です。Honeycome公式アップローダーのシーン一覧では、シーン内キャラの HC / SV / AC 人数表示と一括変換ダウンロードも行えます。
 
 ## できること
 
@@ -32,6 +32,9 @@ Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカー
 - ホバーでツールチップ表示 (フェイス画像 + 名前 + プロダクト名)
 - クリックで詳細パネル表示 (Sex, Birthday, Blocks, JSON エクスポート)
 - 非カードPNGは軽量ヘッダーチェックで早期スキップ (LRU キャッシュ付き)
+- Honeycome公式アップローダーのシーン一覧で、シーン内キャラの `HC / SV / AC` 人数を自動表示
+- シーン内の埋め込みキャラを `HC / SV / AC` に一括変換して再ダウンロード
+- GET 末尾に付着する HTML ゴミを除外するチェックボックス付き
 - Optionsページで有効/無効、ホバー遅延、ツールチップ表示の切り替え
 
 ---
@@ -78,9 +81,11 @@ Content Script          Service Worker
             <─ bool ──
   hover/click ─parse─>  parseCardSummary()
             <─ data ──
+  scene list ─parse─>  parseHcScene() + transformCard()
+            <─ counts ─
   Shadow DOM で表示
 ```
 
 - **3 つの Vite ビルド**: content script (IIFE), service worker (ESM), options page (HTML)
-- **Service Worker** で cross-origin fetch + koikatu.js パースを実行
+- **Service Worker** で cross-origin fetch + koikatu.js パース/シーン変換を実行
 - **Shadow DOM (closed)** でページ CSS と干渉しない UI を描画

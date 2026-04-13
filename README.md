@@ -2,7 +2,7 @@
 
 [日本語](README.ja.md)
 
-A Chrome extension that detects Koikatu/Honeycome character cards from PNG images on web pages and displays card info as an overlay.
+A Chrome extension that detects Koikatu/Honeycome character cards from PNG images on web pages and displays card info as an overlay. On the Honeycome official scene uploader list, it also shows HC / SV / AC character counts inside each scene and can download converted scene files.
 
 ## What it does
 
@@ -32,6 +32,9 @@ It can also list which mods are used by the character:
 - Hover to show tooltip (name + product + MOD badge)
 - Click tooltip to open detail panel (face image, sex, birthday, blocks, used mods, JSON export)
 - Non-card PNGs are quickly rejected via lightweight header check (with LRU cache)
+- On the Honeycome official uploader scene list, automatically shows `HC / SV / AC` character counts per scene
+- Converts embedded scene characters to `HC / SV / AC` and downloads the rebuilt scene
+- Includes a checkbox to strip the dirty trailing HTML appended to official scene downloads
 - Options page to toggle enable/disable, hover delay, and tooltip visibility
 
 ---
@@ -78,9 +81,11 @@ Content Script          Service Worker
             <─ bool ──
   hover     ──parse──>  parseCardSummary()
             <─ data ──
+  scene list ─parse─>  parseHcScene() + transformCard()
+            <─ counts ─
   Shadow DOM overlay
 ```
 
 - **3 Vite builds**: content script (IIFE), service worker (ESM), options page (HTML)
-- **Service Worker** handles cross-origin fetch + koikatu.js parsing
+- **Service Worker** handles cross-origin fetch + koikatu.js card parsing / scene conversion
 - **Shadow DOM (closed)** isolates overlay UI from page CSS
