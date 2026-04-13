@@ -18,7 +18,6 @@
 (function () {
   'use strict';
 
-  const { parseHcScene, serializeHcScene, transformCard, walkSceneObjects } = KoikatuJS;
   const { gunzipSync, unzipSync } = fflate;
 
   // ---------------------------------------------------------------------------
@@ -27,29 +26,11 @@
 
   const HONEYCOME_SERIES_TARGETS = ['HC', 'SV', 'AC'];
 
-  const HEADER_TO_TARGET = {
-    '【HCChara】': 'HC',
-    '【HCPChara】': 'HC',
-    '【DCChara】': 'HC',
-    '【SVChara】': 'SV',
-    '【ACChara】': 'AC',
-  };
-
   const TARGET_LABELS = {
     HC: 'Honeycome',
     SV: 'SummerVacationScramble',
     AC: 'Aicomi',
   };
-
-  function createEmptyHoneycomeSeriesCounts() {
-    return { HC: 0, SV: 0, AC: 0 };
-  }
-
-  /** @param {string|undefined} header */
-  function honeycomeSeriesFromHeader(header) {
-    if (!header) return null;
-    return HEADER_TO_TARGET[header] ?? null;
-  }
 
   function honeycomeSeriesLabel(target) {
     return TARGET_LABELS[target] ?? target;
@@ -215,43 +196,145 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Scene analysis (src/background/fetch-and-parse-scene.ts の summarizeCharacters より移植)
+  // Web Worker (parse / convert をメインスレッドから分離してフリーズを防ぐ)
   // ---------------------------------------------------------------------------
 
-  const HTML_TAIL_PREFIXES = ['<?xml', '<!DOCTYPE html', '<html', '<body'];
+  // Worker 内で importScripts するので @require で読み込んだ globals は使えない。
+  // CDN URL をそのまま埋め込む。
+  const WORKER_CODE = `
+importScripts(
+  'https://cdn.jsdelivr.net/npm/koikatu.js@0.1.5/dist/index.global.min.js',
+  'https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js'
+);
 
-  function looksLikeDirtyHtmlTail(data) {
-    if (!data || data.length === 0) return false;
-    const sample = new TextDecoder().decode(data.subarray(0, 256)).trimStart();
-    return HTML_TAIL_PREFIXES.some((prefix) => sample.startsWith(prefix));
+const { parseHcScene, serializeHcScene, transformCard, walkSceneObjects } = KoikatuJS;
+
+const HEADER_TO_TARGET = {
+  '\\u3010HCChara\\u3011': 'HC',
+  '\\u3010HCPChara\\u3011': 'HC',
+  '\\u3010DCChara\\u3011': 'HC',
+  '\\u3010SVChara\\u3011': 'SV',
+  '\\u3010ACChara\\u3011': 'AC',
+};
+const HTML_TAIL_PREFIXES = ['<?xml', '<!DOCTYPE html', '<html', '<body'];
+
+function honeycomeSeriesFromHeader(h) {
+  return HEADER_TO_TARGET[h] ?? null;
+}
+
+function looksLikeDirtyHtmlTail(data) {
+  if (!data || !data.length) return false;
+  const sample = new TextDecoder().decode(data.subarray(0, 256)).trimStart();
+  return HTML_TAIL_PREFIXES.some(p => sample.startsWith(p));
+}
+
+self.onmessage = function({ data: msg }) {
+  const { reqId, type, bytes, target, stripDirtyHtml } = msg;
+  try {
+    if (type === 'parse') {
+      const scene = parseHcScene(bytes, { containsPng: true, decodeEmbeddedCards: true });
+      const counts = { HC: 0, SV: 0, AC: 0 };
+      let total = 0;
+      for (const entry of walkSceneObjects(scene, { objectType: 0 })) {
+        const t = honeycomeSeriesFromHeader(entry.object.data.character?.header?.header);
+        if (!t) continue;
+        counts[t]++; total++;
+      }
+      const hasDirty = looksLikeDirtyHtmlTail(scene.unknownTailExtra);
+      self.postMessage({ reqId, type: 'parse-result', result: {
+        title: scene.title, version: scene.version,
+        characterCounts: counts, characterTotal: total,
+        hasDirtyHtmlTail: hasDirty,
+        dirtyHtmlTailBytes: hasDirty ? (scene.unknownTailExtra?.length ?? 0) : 0,
+      }});
+
+    } else if (type === 'convert') {
+      const scene = parseHcScene(bytes, { containsPng: true, decodeEmbeddedCards: true });
+      const entries = Array.from(walkSceneObjects(scene, { objectType: 0 }));
+      const total = entries.length;
+      let converted = 0;
+      self.postMessage({ reqId, type: 'progress', processed: 0, total, converted });
+
+      for (let i = 0; i < entries.length; i++) {
+        const card = entries[i].object.data.character;
+        const source = honeycomeSeriesFromHeader(card?.header?.header);
+        if (!card || !source) throw new Error('Honeycome\\u7CFB\\u4EE5\\u5916\\u306E\\u30AD\\u30E3\\u30E9\\u304C\\u542B\\u307E\\u308C\\u3066\\u3044\\u307E\\u3059');
+        if (source !== target) {
+          entries[i].object.data.character = transformCard(card, target, {
+            pngBytes: entries[i].object.data.characterPng,
+          });
+          converted++;
+        }
+        self.postMessage({ reqId, type: 'progress', processed: i + 1, total, converted });
+      }
+
+      const hasDirty = looksLikeDirtyHtmlTail(scene.unknownTailExtra);
+      const shouldStrip = stripDirtyHtml && hasDirty;
+      if (shouldStrip) delete scene.unknownTailExtra;
+      const out = serializeHcScene(scene);
+      self.postMessage({ reqId, type: 'convert-result', bytes: out, converted, strippedDirtyHtml: shouldStrip }, [out.buffer]);
+    }
+  } catch (err) {
+    self.postMessage({ reqId, type: 'error', message: err.message });
+  }
+};
+`;
+
+  let _worker = null;
+  let _nextReqId = 1;
+  const _pending = new Map(); // reqId -> { resolve, reject, onProgress }
+
+  function getWorker() {
+    if (_worker) return _worker;
+    const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
+    _worker = new Worker(URL.createObjectURL(blob));
+    _worker.onmessage = ({ data }) => {
+      const req = _pending.get(data.reqId);
+      if (!req) return;
+      if (data.type === 'progress') {
+        req.onProgress?.(data);
+      } else if (data.type === 'parse-result' || data.type === 'convert-result') {
+        _pending.delete(data.reqId);
+        req.resolve(data);
+      } else if (data.type === 'error') {
+        _pending.delete(data.reqId);
+        req.reject(new Error(data.message));
+      }
+    };
+    _worker.onerror = (e) => {
+      for (const req of _pending.values()) req.reject(new Error(e.message));
+      _pending.clear();
+      _worker = null;
+    };
+    return _worker;
   }
 
-  function summarizeCharacters(sceneBytes) {
-    const scene = parseHcScene(sceneBytes, {
-      containsPng: true,
-      decodeEmbeddedCards: true,
+  function workerRequest(type, extra, transfer = [], onProgress = null) {
+    return new Promise((resolve, reject) => {
+      const reqId = _nextReqId++;
+      _pending.set(reqId, { resolve, reject, onProgress });
+      getWorker().postMessage({ reqId, type, ...extra }, transfer);
     });
-    const characterCounts = createEmptyHoneycomeSeriesCounts();
-    let characterTotal = 0;
+  }
 
-    for (const entry of walkSceneObjects(scene, { objectType: 0 })) {
-      const header = entry.object.data.character?.header?.header;
-      const target = honeycomeSeriesFromHeader(header);
-      if (!target) continue;
-      characterCounts[target] += 1;
-      characterTotal += 1;
-    }
+  /** @param {Uint8Array} bytes */
+  function workerParseScene(bytes) {
+    // Worker にコピーを渡し、メインスレッドの bytes は cachedBytes として保持する
+    const copy = bytes.slice();
+    return workerRequest('parse', { bytes: copy }, [copy.buffer])
+      .then(({ result }) => result);
+  }
 
-    const hasDirtyHtmlTail = looksLikeDirtyHtmlTail(scene.unknownTailExtra);
-
-    return {
-      title: scene.title,
-      version: scene.version,
-      characterCounts,
-      characterTotal,
-      hasDirtyHtmlTail,
-      dirtyHtmlTailBytes: hasDirtyHtmlTail ? (scene.unknownTailExtra?.length ?? 0) : 0,
-    };
+  /**
+   * @param {Uint8Array} bytes
+   * @param {string} target
+   * @param {boolean} stripDirtyHtml
+   * @param {(p: {processed:number, total:number, converted:number}) => void} onProgress
+   */
+  function workerConvertScene(bytes, target, stripDirtyHtml, onProgress) {
+    const copy = bytes.slice();
+    return workerRequest('convert', { bytes: copy, target, stripDirtyHtml }, [copy.buffer], onProgress)
+      .then(({ bytes: out, converted, strippedDirtyHtml }) => ({ bytes: out, converted, strippedDirtyHtml }));
   }
 
   // ---------------------------------------------------------------------------
@@ -453,34 +536,22 @@
           state.cachedBytes = bytes;
 
           let outputBytes;
-          let convertedCharacters = 0;
 
           if (isDirect) {
             meta.textContent = 'ダウンロード中…';
             outputBytes = bytes;
           } else {
-            meta.textContent = `${target} へ変換しています…`;
-            const scene = parseHcScene(bytes, {
-              containsPng: true,
-              decodeEmbeddedCards: true,
-            });
-            const entries = Array.from(walkSceneObjects(scene, { objectType: 0 }));
-            for (const entry of entries) {
-              const card = entry.object.data.character;
-              const source = honeycomeSeriesFromHeader(card?.header?.header);
-              if (!card || !source) throw new Error('Honeycome 系以外のキャラが含まれています');
-              if (source !== target) {
-                entry.object.data.character = transformCard(card, target, {
-                  pngBytes: entry.object.data.characterPng,
-                });
-                convertedCharacters += 1;
-              }
-            }
-            const shouldStrip = dirtyTailCheckbox.checked && pr?.hasDirtyHtmlTail;
-            if (shouldStrip) delete scene.unknownTailExtra;
-            outputBytes = (convertedCharacters === 0 && !shouldStrip)
-              ? bytes
-              : serializeHcScene(scene);
+            meta.textContent = `${target} へ変換しています… (0/${pr?.characterTotal ?? '?'})`;
+            const result = await workerConvertScene(
+              bytes,
+              target,
+              dirtyTailCheckbox.checked,
+              ({ processed, total }) => {
+                meta.textContent = `${target} へ変換しています… (${processed}/${total})`;
+                positionScenePanel(link, state);
+              },
+            );
+            outputBytes = result.bytes;
           }
 
           const filename = getDownloadFilename(link.href, target);
@@ -517,7 +588,7 @@
       try {
         const bytes = await fetchBytes(link.href);
         state.cachedBytes = bytes;
-        const result = summarizeCharacters(bytes);
+        const result = await workerParseScene(bytes);
 
         state.title.textContent = result.title;
         state.meta.textContent = `Scene v${result.version} / キャラ合計 ${result.characterTotal}人`;
