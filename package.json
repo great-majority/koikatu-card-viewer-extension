@@ -21,6 +21,7 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
-    "koikatu.js": "^0.1.1"
+    "fflate": "^0.8.2",
+    "koikatu.js": "^0.1.3"
   }
 }

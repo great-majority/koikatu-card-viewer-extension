@@ -3,7 +3,7 @@
   "name": "Koikatu Card Viewer",
   "version": "0.1.0",
   "description": "Detect and display Koikatu/Honeycome character card info from PNG images on web pages.",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "downloads", "storage"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background/service-worker.js",
