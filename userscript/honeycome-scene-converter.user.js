@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Honeycome Scene Converter
 // @namespace    https://github.com/great-majority/koikatu-chrome-extension
-// @version      0.4.0
+// @version      0.1.1
 // @description  HC/SV/AC character counts and scene conversion on Honeycome official uploader
 // @author       tropical-362827
 // @match        https://honeycome-uploader.illgames.jp/list/scene*
-// @require      https://cdn.jsdelivr.net/npm/koikatu.js@0.1.4/dist/index.global.min.js
+// @require      https://cdn.jsdelivr.net/npm/koikatu.js@0.1.5/dist/index.global.min.js
 // @require      https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js
 // @grant        GM_xmlhttpRequest
 // @connect      honeycome-uploader.illgames.jp
