@@ -137,9 +137,29 @@
   .koikatu-scene-tools__error {
     color: #b91c1c;
   }
+  .koikatu-scene-tools__toast {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(22, 163, 74, 0.92);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    pointer-events: none;
+    animation: koikatu-scene-toast 2s ease forwards;
+  }
   @keyframes koikatu-scene-spin {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
+  }
+  @keyframes koikatu-scene-toast {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; }
   }
   `;
 
@@ -374,6 +394,14 @@ self.onmessage = function({ data: msg }) {
     setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
   }
 
+  function showDownloadToast(container) {
+    const toast = document.createElement('div');
+    toast.className = 'koikatu-scene-tools__toast';
+    toast.textContent = 'ダウンロードしました';
+    container.appendChild(toast);
+    toast.addEventListener('animationend', () => toast.remove());
+  }
+
   // ---------------------------------------------------------------------------
   // URL detection (src/content/scene-links.ts の isOfficialSceneDownloadUrl より移植)
   // ---------------------------------------------------------------------------
@@ -558,6 +586,7 @@ self.onmessage = function({ data: msg }) {
           const filename = getDownloadFilename(link.href, target);
           downloadBytes(outputBytes, filename);
           meta.textContent = `ファイル名: ${filename}`;
+          showDownloadToast(container);
         } catch (err) {
           meta.classList.add('koikatu-scene-tools__error');
           meta.textContent = `変換失敗: ${err.message}`;
