@@ -39,6 +39,20 @@ It can also list which mods are used by the character:
 
 ---
 
+## Userscript
+
+A standalone Tampermonkey/Greasemonkey userscript is also available in the [`userscript/`](userscript/) directory.
+
+**[Honeycome Scene Converter](userscript/honeycome-scene-converter.user.js)** — works on the [Honeycome official scene uploader](https://honeycome-uploader.illgames.jp/list/scene) list page. Clicking a scene download link opens an analysis panel instead of downloading directly, showing character counts per title (HC / SV / AC) and letting you convert and download the scene for any of the three titles.
+
+[Full documentation](/userscript/README.md)
+
+- Runs on [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) / [Greasemonkey](https://addons.mozilla.org/firefox/addon/greasemonkey/)
+- [Install from OpenUserJS](https://openuserjs.org/scripts/tropical-362827/%E3%83%8F%E3%83%8B%E3%82%AB%E3%83%A0%E3%82%B7%E3%83%BC%E3%83%B3%E3%83%87%E3%83%BC%E3%82%BF%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF%E3%83%BC)
+- Conversion runs entirely in the browser (no external server)
+
+---
+
 ## Development
 
 ### Requirements

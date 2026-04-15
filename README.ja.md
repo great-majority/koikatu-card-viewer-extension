@@ -39,6 +39,20 @@ Webページ上のPNG画像からKoikatu/Honeycome系のキャラクターカー
 
 ---
 
+## ユーザースクリプト
+
+拡張機能とは別に、単体で動作するユーザースクリプトも [`userscript/`](userscript/) ディレクトリに収録しています。
+
+**[ハニカムシーンデータコンバーター](userscript/honeycome-scene-converter.user.js)** — [Honeycome公式シーンアップローダー](https://honeycome-uploader.illgames.jp/list/scene) のシーン一覧ページで動作します。ダウンロードリンクをクリックすると、直接ダウンロードする代わりにパネルが開き、シーン内のキャラ内訳 (HC / SV / AC) を確認しながら好きなタイトル向けに変換してダウンロードできます。
+
+[詳しい説明はこちら](/userscript/README.md)
+
+- [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) / [Greasemonkey](https://addons.mozilla.org/ja/firefox/addon/greasemonkey/) 上で動作します
+- [OpenUserJSからインストール](https://openuserjs.org/scripts/tropical-362827/%E3%83%8F%E3%83%8B%E3%82%AB%E3%83%A0%E3%82%B7%E3%83%BC%E3%83%B3%E3%83%87%E3%83%BC%E3%82%BF%E3%82%B3%E3%83%B3%E3%83%90%E3%83%BC%E3%82%BF%E3%83%BC)できます
+- 変換処理はすべてブラウザ内で完結（外部サーバーへの送信なし）
+
+---
+
 ## 開発
 
 ### 必要なもの
